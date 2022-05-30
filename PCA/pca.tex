@@ -1,0 +1,117 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you open the
+% 'Share' menu, you can invite other users to edit at the same
+% time. See www.overleaf.com/learn for more info. Enjoy!
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ===============================================
+% MATH 790: Real Analysis           Spring 2022
+% hw_template.tex
+% ===============================================
+
+% -------------------------------------------------------------------------
+% The preamble that follows can be ignored. Go on
+% down to the section that says "START HERE" 
+% -------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb,hyperref}
+
+% \newcommand{\R}{\mathbf{R}}  
+% \newcommand{\Z}{\mathbf{Z}}
+% \newcommand{\N}{\mathbf{N}}
+% \newcommand{\Q}{\mathbf{Q}}
+
+% \newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+% \newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+% \newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+% \newenvironment{problem}[2][Problem]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+% \newenvironment{question}[2][Question]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+% \newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+
+% \newenvironment{solution}{\begin{proof}[Solution]}{\end{proof}}
+
+\begin{document}
+
+% ------------------------------------------ %
+%                 START HERE                  %
+% ------------------------------------------ %
+
+\title{Principle Component Analysis (PCA)}
+% \author{Author's Name\\Math 790, Real Analysis} % Replace "Author's Name" with your name
+
+\maketitle
+
+Consider a $n \times 1$ random column vector $\mathbf{x}$ with zero mean (i.e. $\mathbb{E}[\mathbf{x}] = \mathbf{0})$ Our aim is to find the linear combination of its component, such that the variance is maximised.
+
+
+First of all, we denote a real number $y$ as the linear combination of $\mathbf{x}$ elements with weight determined by $\mathbf{w}$, a $n \times 1$ column vector
+\begin{align}
+    y = \mathbf{w}^{T}\mathbf{x}
+\end{align}
+
+Variance of $y$ is given by
+\begin{align}
+    \sigma_{y}^{2} &= \mathbb{E}[y^{2}] - \mathbb{E}[y]^{2} \notag \\
+    &= \mathbb{E}[y^{2}] \qquad (\because \mathbb{E}[\mathbf{x}] = 0) \notag \\
+    &= \mathbf{w}^{T}\mathbb{E}[\mathbf{x}\mathbf{x}^{T}] \mathbf{w} \notag \\
+    &= \mathbf{w}^{T}\mathbf{C_{x}}\mathbf{w} \qquad  (\because \mathbb{E}[\mathbf{x}] = 0) 
+\end{align}
+where $\mathbf{C_{x}}$ is the covariance matrix of $\mathbf{x}$
+
+There is an issue to maximise the variance of $y$, $\sigma_{y}^{2}$. As you can see, we if scale the weighting vector by a factor of $\alpha > 1$ (i.e. $\mathbf{w} \to \alpha \mathbf{w}$), $\sigma_{y}^{2}$ would be increased by $\alpha^{2}$. Therefore, it makes more sense to consider a normalised weighting vector with unit length. Hence, our constraint would be $||\mathbf{w} ||^{2} = 1$.
+
+For constrained optimisation with equality, we apply Lagrange multiplier method and our objective function $J$ is given by
+\begin{align}
+    J &\equiv  \mathbf{w}^{T}\mathbf{C_{x}}\mathbf{w} - \lambda \big(||\mathbf{w} ||^{2} - 1\big) \notag \\
+     &= \sum_{i, j=1}^{n} w_{i} (C_{x})_{ij} w_{j} - \lambda \big( \sum_{i=1}^{n} w_{i}^{2} - 1 \big)
+\end{align}
+
+Taking derivative of $J$ with respective to $w_{k}$, we have
+\begin{align}
+    \frac{\partial J}{\partial w_{k}} &= 0 \notag \\
+    \sum_{j=1}^{n} (C_{x})_{kj} w_{j} + \sum_{i=1}^{n} w_{i} (C_{x})_{ik} - 2\lambda w_{k} &= 0 \notag  \\
+    \sum_{j=1}^{n} (C_{x})_{kj} w_{j} + \sum_{i=1}^{n} w_{i} (C_{x})_{ki} - 2\lambda w_{k} &= 0 \qquad (\because \mathbf{C_{x}}^{T} = \mathbf{C_{x}})  \notag \\
+    2 \sum_{i=1}^{n} w_{i} (C_{x})_{ki} &=  2\lambda w_{k} \notag \\
+    (\mathbf{C_{x} w})_{k} &= \lambda w_{k} \qquad \mathrm{for \; all \; k = 1, 2, ..., n}
+\end{align}
+
+In other words, the weight $\mathbf{w}$ that maximises the objective function $J$ is governed by
+\begin{align}
+    \mathbf{C_{x} w} \; = \; \lambda \mathbf{w}
+\end{align}
+which implies that the optimal $\mathbf{w}$ is an eigen-vector of the covariance matrix $\mathbf{C_{x}}$, and the Lagrange multiplier is an eigen-value of the covariance matrix $\mathbf{C_{x}}$.
+
+The maximised variance of $y$ is given by
+\begin{align}
+    \sigma_{y}^{2} &= \mathbf{w}^{T}\mathbf{C_{x}}\mathbf{w} \notag \\
+    &= \lambda \mathbf{w}^{T} \mathbf{w} \notag \\
+    &= \lambda \qquad (\because ||\mathbf{w}|| = 1)
+\end{align}
+which is an eigen-value of the covariance matrix $\mathbf{C_{x}}$.
+
+For a covariance matrix $\mathbf{C_{x}}$ which is a $n \times n$ semi-definite matrix, it has $n$ non-negative eige-values $\lambda_{i}$
+\begin{align}
+    \lambda_{1} \geq \lambda_{2} \geq \cdots \geq \lambda_{n-1} \geq \lambda_{n} \geq 0
+\end{align}
+
+To truly maximise the variance of $y$, we can choose an eigen-vector $\mathbf{w}$ that corresponds to the largest eigen-value $\lambda_{1}$. We call this eigen-vector $\mathbf{w}_{1}$, the first principle component.
+
+
+
+% ---------------------------------------------------
+% Anything after the \end{document} will be ignored by the typesetting.
+% ----------------------------------------------------
+
+\end{document}
